@@ -8,6 +8,7 @@ import struct
 import time
 import select
 import socket
+import os
 
 MINIMAL_TIMER = 1
 
@@ -47,7 +48,9 @@ class MSDPClient:
                         system_name=self.system_name,
                         system_platform=self.system_platform,
                         system_version=self.system_version,
-                        keepalive_timer=self.keepalive_timer)
+                        keepalive_timer=self.keepalive_timer,
+                        uptime=int(time.clock_gettime(time.CLOCK_BOOTTIME)),
+                        load=os.getloadavg())
         self.client.send_message(msg.format())
         #print(msg.format())
         #print(f"Sent message: {self.system_name} {self.system_platform} {self.system_version}")
@@ -118,6 +121,10 @@ class MSDPClient:
                             entry.keepalive_timer = msg.keepalive_timer
                             entry.last_seen = time.time()
                             entry.address = address[0]
+                            entry.uptime = msg.uptime
+                            entry.load = msg.load
+
+
                             entry.update_expiration_time()
 
                             if verbose:
@@ -131,7 +138,9 @@ class MSDPClient:
                                       system_version=msg.system_version,
                                       keepalive_timer=msg.keepalive_timer,
                                       address=address[0], 
-                                      last_seen=time.time())
+                                      last_seen=time.time(),
+                                      uptime=msg.uptime,
+                                      load=msg.load)
                         if verbose:
                             print(f"Adding new entry: {entry.system_name} {entry.system_platform} {entry.system_version}")
                         self.entries.append(entry)

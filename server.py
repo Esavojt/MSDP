@@ -9,7 +9,7 @@ def message_handler(msg, address, c : MSDPClient):
     #print(c)
     print("======================================")
     for entry in c.entries:
-        print(f"\nEntry: {entry.system_name=}\n\t{entry.system_platform=}\n\t{entry.system_version=}\n\t{entry.keepalive_timer=}\n\t{entry.address=}\n\t{entry.last_seen=}\n")
+        print(f"\nEntry: {entry.system_name=}\n\t{entry.system_platform=}\n\t{entry.system_version=}\n\t{entry.keepalive_timer=}\n\t{entry.address=}\n\t{entry.uptime=}s\n\t{entry.load=}\n")
 
 client.add_message_handler(message_handler)
 
