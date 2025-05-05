@@ -12,8 +12,12 @@ name = "server"
 path = "src/bin/server.rs"
 
 [[bin]]
-name = "proxy"
-path = "src/bin/proxy.rs"
+name = "http_proxy"
+path = "src/bin/http_proxy.rs"
+
+[[bin]]
+name = "raw_proxy"
+path = "src/bin/raw_proxy.rs"
 
 [dependencies]
 serde = { version = "1.0.219", features = ["derive"] }

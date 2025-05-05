@@ -20,22 +20,6 @@ impl TCPServerTrait for ProxyServer {
         &self.entries
     }
 
-    fn handle_connections(&self) -> std::io::Result<()> {
-        println!("Proxy server is listening on {}", self.get_socket().local_addr()?);
-        for stream in self.get_socket().incoming() {
-            match stream {
-                Ok(stream) => {
-                    println!("New connection to proxy: {}", stream.peer_addr()?);
-                    self.handle_client(stream)?;
-                }
-                Err(e) => {
-                    eprintln!("Error accepting connection: {}", e);
-                }
-            }
-        }
-        Ok(())
-    }
-
     fn handle_client(&self, mut stream: std::net::TcpStream) -> std::io::Result<()> {
         let json = {
             let entries = self.get_entries().lock().unwrap();

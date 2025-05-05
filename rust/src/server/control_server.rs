@@ -23,7 +23,14 @@ pub trait TCPServerTrait {
             match stream {
                 Ok(stream) => {
                     println!("New connection: {}", stream.peer_addr()?);
-                    self.handle_client(stream)?;
+                    let state = self.handle_client(stream);
+                    if let Err(e) = state {
+                        if e.kind() == std::io::ErrorKind::BrokenPipe || e.kind() == std::io::ErrorKind::ConnectionReset{
+                            println!("Client disconnected: {}", e);
+                        } else {
+                            return Err(e);
+                        }
+                    }
                 }
                 Err(e) => {
                     eprintln!("Error accepting connection: {}", e);
