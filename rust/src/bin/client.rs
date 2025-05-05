@@ -1,9 +1,17 @@
 use std::{io::Read, net::TcpStream};
+use std::env;
 
 use rust::structs::entry::Entry;
 
 fn main() -> std::io::Result<()> {
-    let data = get_data_from_socket("localhost:10001")?;
+    let mut addr = String::from("localhost:10001");
+    let mut args = env::args();
+
+    if args.len() > 1 {
+        // Set the address from the command line argument
+        addr = args.nth(1).unwrap();
+    }
+    let data = get_data_from_socket(&addr)?;
     //println!("{}", data);
 
     let entries: Vec<Entry> = serde_json::from_str(&data)?;

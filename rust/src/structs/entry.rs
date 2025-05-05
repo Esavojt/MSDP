@@ -30,17 +30,17 @@ impl Entry {
 
         let mut string = String::new();
         string += &format!("Entry: {} ({})\n", &self.system_name, &self.unique_id);
-        string += &format!("\tAddress: {}\n", &self.address);
-        string += &format!("\tPlatform: {}\n", &self.system_platform);
-        string += &format!("\tSystem version: {}\n", &self.system_version);
-        string += &format!("\tKeepalive timer: {}s\n", &self.keepalive_timer);
+        string += &format!(" ▪ Address: {}\n", &self.address);
+        string += &format!(" ▪ Platform: {}\n", &self.system_platform);
+        string += &format!(" ▪ System version: {}\n", &self.system_version);
+        string += &format!(" ▪ Keepalive timer: {}s\n", &self.keepalive_timer);
         string += &format!(
-            "\tLast seen: {}\n",
+            " ▪ Last seen: {}\n",
             format_time(time.as_secs().abs_diff(self.last_seen as u64))
         );
-        string += &format!("\tUptime: {}\n", format_time(self.uptime as u64));
+        string += &format!(" ▪ Uptime: {}\n", format_time(self.uptime as u64));
         string += &format!(
-            "\tLoad: {:.2} {:.2} {:.2}",
+            " ▪ Load: {:.2} {:.2} {:.2}",
             self.load[0], self.load[1], self.load[2]
         );
         string
