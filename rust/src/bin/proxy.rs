@@ -3,6 +3,7 @@ use std::sync::Mutex;
 
 use rust::server::control_server;
 use rust::server::control_server::TCPServerTrait;
+use rust::server::proxy_server;
 use rust::server::server::MSDPServer;
 use rust::structs::entry::Entry;
 
@@ -27,9 +28,20 @@ fn main() {
     let control_server =
         control_server::ControlServer::new("127.0.0.1:10001".to_string(), Arc::clone(&entries))
             .unwrap();
-
+        
     std::thread::spawn(move || {
         control_server
+            .handle_connections()
+            .expect("Failed to handle connections");
+    });
+
+    let proxy_server = 
+        proxy_server::ProxyServer::new("0.0.0.0:10002".to_string(), Arc::clone(&entries))
+            .unwrap();
+
+
+    std::thread::spawn(move || {
+        proxy_server
             .handle_connections()
             .expect("Failed to handle connections");
     });

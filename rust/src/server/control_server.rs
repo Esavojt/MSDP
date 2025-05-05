@@ -12,19 +12,14 @@ pub struct ControlServer {
     entries: Arc<Mutex<Vec<Entry>>>,
 }
 
-impl ControlServer {
-    pub fn new(addr: String, entries: Arc<Mutex<Vec<Entry>>>) -> std::io::Result<Self> {
-        let socket = TcpListener::bind(&addr)?;
-        Ok(ControlServer {
-            socket,
-            addr,
-            entries,
-        })
-    }
+pub trait TCPServerTrait {
+    fn get_socket(&self) -> &TcpListener;
 
-    pub fn handle_connections(&self) -> std::io::Result<()> {
-        println!("Control server is listening on {}", self.addr);
-        for stream in self.socket.incoming() {
+    fn get_entries(&self) -> &Arc<Mutex<Vec<Entry>>>;
+
+    fn handle_connections(&self) -> std::io::Result<()> {
+        println!("Control server is listening on {}", self.get_socket().local_addr()?);
+        for stream in self.get_socket().incoming() {
             match stream {
                 Ok(stream) => {
                     println!("New connection: {}", stream.peer_addr()?);
@@ -36,6 +31,28 @@ impl ControlServer {
             }
         }
         Ok(())
+    }
+
+    fn handle_client(&self, stream: std::net::TcpStream) -> std::io::Result<()>;
+}
+
+impl ControlServer {
+    pub fn new(addr: String, entries: Arc<Mutex<Vec<Entry>>>) -> std::io::Result<Self> {
+        let socket = TcpListener::bind(&addr)?;
+        Ok(ControlServer {
+            socket,
+            addr,
+            entries,
+        })
+    }
+}
+
+impl TCPServerTrait for ControlServer {
+    fn get_socket(&self) -> &TcpListener {
+        &self.socket
+    }
+    fn get_entries(&self) -> &Arc<Mutex<Vec<Entry>>> {
+       &self.entries
     }
 
     fn handle_client(&self, mut stream: std::net::TcpStream) -> std::io::Result<()> {

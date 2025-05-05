@@ -6,9 +6,14 @@ edition = "2024"
 [[bin]]
 name = "client"
 path = "src/bin/client.rs"
+
 [[bin]]
 name = "server"
 path = "src/bin/server.rs"
+
+[[bin]]
+name = "proxy"
+path = "src/bin/proxy.rs"
 
 [dependencies]
 serde = { version = "1.0.219", features = ["derive"] }
