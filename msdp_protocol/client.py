@@ -9,6 +9,7 @@ import time
 import select
 import socket
 import os
+import json
 
 MINIMAL_TIMER = 1
 
@@ -33,7 +34,7 @@ class MSDPClient:
         # If unique_id is None, generate a unique ID (128bit UUID)
         if unique_id is None:
             import uuid
-            unique_id = uuid.uuid4().bytes
+            unique_id = uuid.uuid4()
 
         self.unique_id = unique_id
 
@@ -86,8 +87,8 @@ class MSDPClient:
             self.handlers[key] = []
         
     
-    def run_indefinitely(self, verbose=False):
-        print(f"Running MSDP client with unique ID: {self.unique_id.hex()}")
+    def handle_connections(self, verbose=False):
+        print(f"Running MSDP client with unique ID: {str(self.unique_id)}")
         time_to_send = time.time() + self.keepalive_timer
         while True:
             # Check if it's time to send a message
@@ -119,7 +120,7 @@ class MSDPClient:
                             entry.system_platform = msg.system_platform
                             entry.system_version = msg.system_version
                             entry.keepalive_timer = msg.keepalive_timer
-                            entry.last_seen = time.time()
+                            entry.last_seen = int(time.time())
                             entry.address = address[0]
                             entry.uptime = msg.uptime
                             entry.load = msg.load
@@ -138,7 +139,7 @@ class MSDPClient:
                                       system_version=msg.system_version,
                                       keepalive_timer=msg.keepalive_timer,
                                       address=address[0], 
-                                      last_seen=time.time(),
+                                      last_seen=int(time.time()),
                                       uptime=msg.uptime,
                                       load=msg.load)
                         if verbose:
@@ -153,6 +154,12 @@ class MSDPClient:
 
     def close(self):
         self.client.close()
+
+    def entriesJson(self):
+        """
+        Returns a JSON representation of the entries.
+        """
+        return json.dumps([entry.to_dict() for entry in self.entries])
 
     def _expire_entries(self, verbose):
         for entry in self.entries:

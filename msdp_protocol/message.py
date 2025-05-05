@@ -1,4 +1,5 @@
 import struct
+import uuid
 class MessageV1:
     """
     MessageV1 class represents a message in the MSDP protocol.
@@ -20,7 +21,7 @@ class MessageV1:
         """
         Parse the incoming data into the MessageV1 object.
         """
-        self.unique_id = struct.unpack("!16s", data[0:16])[0]
+        self.unique_id = uuid.UUID(bytes=struct.unpack("!16s", data[0:16])[0])
         self.version = struct.unpack("!h", data[16:18])[0]
 
         system_name_length = struct.unpack("!h", data[18:20])[0]
@@ -49,7 +50,7 @@ class MessageV1:
 
     def format(self):
         data = \
-        struct.pack("!16s", self.unique_id) + struct.pack("!h", self.version) + \
+        struct.pack("!16s", self.unique_id.bytes) + struct.pack("!h", self.version) + \
         struct.pack("!h", len(self.system_name)) + self.system_name.encode('utf-8') + \
         struct.pack("!h", len(self.system_platform)) + self.system_platform.encode('utf-8') + \
         struct.pack("!h", len(self.system_version)) + self.system_version.encode('utf-8') + \

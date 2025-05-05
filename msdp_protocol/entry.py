@@ -17,3 +17,16 @@ class Entry:
     
     def update_expiration_time(self):
         self.expiration_time = self.last_seen + self.keepalive_timer * 2
+
+    def to_dict(self):
+        return {
+            "unique_id": str(self.unique_id),
+            "system_name": self.system_name,
+            "system_platform": self.system_platform,
+            "system_version": self.system_version,
+            "keepalive_timer": self.keepalive_timer,
+            "address": self.address,
+            "last_seen": self.last_seen,
+            "uptime": self.uptime,
+            "load": self.load
+        }
