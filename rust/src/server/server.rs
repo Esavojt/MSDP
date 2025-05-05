@@ -52,7 +52,7 @@ impl MSDPServer {
             sys_info::hostname().unwrap_or_else(|_| "Unknown".to_string()),
             sys_info::os_type().unwrap_or_else(|_| "Unknown".to_string()),
             sys_info::os_release().unwrap_or_else(|_| "Unknown".to_string()),
-            60,
+            self.keepalive_timer,
             uptime.as_secs() as u32,
             [load.one as f32, load.five as f32, load.fifteen as f32],
         )
