@@ -1,0 +1,12 @@
+[Unit]
+Description=MSDP Server Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/msdp_server
+User=nobody
+Group=nogroup
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
