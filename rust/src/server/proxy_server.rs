@@ -2,8 +2,8 @@ use std::io::Write;
 use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 
-use crate::structs::entry::Entry;
 use crate::server::control_server::TCPServerTrait;
+use crate::structs::entry::Entry;
 
 pub struct ProxyServer {
     socket: TcpListener,
@@ -39,11 +39,9 @@ impl TCPServerTrait for ProxyServer {
         stream.write_all(json.as_bytes())?;
         //stream.write_all(b"\r\n")?;
 
-
         stream.shutdown(std::net::Shutdown::Both)?;
         Ok(())
     }
-    
 }
 
 impl ProxyServer {

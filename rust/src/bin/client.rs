@@ -1,5 +1,5 @@
-use std::{io::Read, net::TcpStream};
 use std::env;
+use std::{io::Read, net::TcpStream};
 
 use rust::structs::entry::Entry;
 

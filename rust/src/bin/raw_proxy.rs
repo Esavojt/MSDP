@@ -34,10 +34,9 @@ fn main() {
             .expect("Failed to handle connections");
     });
 
-    let raw_proxy_server = 
+    let raw_proxy_server =
         control_server::ControlServer::new("0.0.0.0:10002".to_string(), Arc::clone(&entries))
             .unwrap();
-
 
     std::thread::spawn(move || {
         raw_proxy_server
