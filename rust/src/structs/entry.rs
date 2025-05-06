@@ -1,8 +1,9 @@
 use std::{
     net::SocketAddr,
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
+use log::error;
 use serde::{Deserialize, Serialize};
 
 use crate::format_time;
@@ -24,24 +25,34 @@ pub struct Entry {
 
 impl Entry {
     pub fn format(&self) -> String {
-        let time = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time is before Unix timestamp");
+        let time = match SystemTime::now().duration_since(UNIX_EPOCH) {
+            Ok(duration) => duration,
+            Err(e) => {
+                error!("Error calculating time: {}", e);
+                Duration::new(0, 0)
+            }
+        };
 
-        let mut string = String::new();
-        string += &format!("Entry: {} ({})\n", &self.system_name, &self.unique_id);
-        string += &format!(" ▪ Address: {}\n", &self.address);
-        string += &format!(" ▪ Platform: {}\n", &self.system_platform);
-        string += &format!(" ▪ System version: {}\n", &self.system_version);
-        string += &format!(" ▪ Keepalive timer: {}s\n", &self.keepalive_timer);
-        string += &format!(
-            " ▪ Last seen: {}\n",
-            format_time(time.as_secs().abs_diff(self.last_seen as u64))
-        );
-        string += &format!(" ▪ Uptime: {}\n", format_time(self.uptime as u64));
-        string += &format!(
-            " ▪ Load: {:.2} {:.2} {:.2}",
-            self.load[0], self.load[1], self.load[2]
+        let string = format!(
+            "Entry: {} ({})\n \
+             ▪ Address: {}\n \
+             ▪ Platform: {}\n \
+             ▪ System version: {}\n \
+             ▪ Keepalive timer: {}s\n \
+             ▪ Last seen: {}\n \
+             ▪ Uptime: {}\n \
+             ▪ Load: {:.2} {:.2} {:.2}",
+            &self.system_name,
+            &self.unique_id,
+            &self.address,
+            &self.system_platform,
+            &self.system_version,
+            &self.keepalive_timer,
+            format_time(time.as_secs().abs_diff(self.last_seen as u64)),
+            format_time(self.uptime as u64),
+            self.load[0],
+            self.load[1],
+            self.load[2]
         );
         string
     }

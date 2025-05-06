@@ -4,6 +4,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use log::{error, info};
+
 use crate::structs::entry::Entry;
 
 pub struct ControlServer {
@@ -22,23 +24,24 @@ pub trait TCPServerTrait {
             "Control server is listening on {}",
             self.get_socket().local_addr()?
         );
+        
         for stream in self.get_socket().incoming() {
             match stream {
                 Ok(stream) => {
-                    println!("New connection: {}", stream.peer_addr()?);
-                    let state = self.handle_client(stream);
+                    info!("New control connection: {}", stream.peer_addr()?);
+                    let state: Result<(), std::io::Error> = self.handle_client(stream);
                     if let Err(e) = state {
                         if e.kind() == std::io::ErrorKind::BrokenPipe
                             || e.kind() == std::io::ErrorKind::ConnectionReset
                         {
-                            println!("Client disconnected: {}", e);
+                            info!("Client disconnected: {}", e);
                         } else {
                             return Err(e);
                         }
                     }
                 }
                 Err(e) => {
-                    eprintln!("Error accepting connection: {}", e);
+                    error!("Error accepting connection: {}", e);
                 }
             }
         }

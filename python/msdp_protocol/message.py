@@ -1,5 +1,6 @@
 import struct
 import uuid
+
 class MessageV1:
     """
     MessageV1 class represents a message in the MSDP protocol.

@@ -1,23 +1,27 @@
 use std::collections::HashMap;
 use std::env;
-use std::{io::Read, net::TcpStream};
 
 use config::Map;
+use log::warn;
+use rust::client::client::Client;
 use rust::structs::entry::Entry;
 
 fn main() -> std::io::Result<()> {
-    let mut file_loc = String::from("client.toml");
+    env_logger::init();
     let mut args = env::args();
-
-    if args.len() > 1 {
-        // Set the address from the command line argument
-        file_loc = args.nth(1).unwrap();
-    }
+    
+    let file_loc: String = match args.nth(1) {
+        Some(arg) => arg,
+        None => {
+            warn!("No config file provided. Using default: config.toml");
+            String::from("config.toml")
+        }
+    };
 
     let conf = config::Config::builder()
         .add_source(config::File::with_name(&file_loc))
         .build()
-        .unwrap();
+        .expect("Failed to load config file");
 
     println!("Reading config file: {}", file_loc);
     let endpoints = conf.try_deserialize::<HashMap<String,Map<String,String>>>().unwrap();
@@ -28,35 +32,13 @@ fn main() -> std::io::Result<()> {
         let addr = format!("{}:{}", ip, port);
         let name = value.get("name").unwrap_or(key);
 
-        let data = get_data_from_socket(&addr)?;
-        //println!("{}", data);
-
-        let entries: Vec<Entry> = serde_json::from_str(&data)?;
+        let entries: Vec<Entry> = Client::connect(&addr)?;
 
         println!("List of neighbors:");
-        println!("----- {}: {} -----", name, addr);
-        let output = format_entries(&entries);
+        println!("=========== {}: {} ===========", name, addr);
+        let output = Client::format_entries(&entries);
         println!("{}", output);
     }
 
     Ok(())
-}
-
-fn get_data_from_socket(addr: &str) -> std::io::Result<String> {
-    let mut stream = TcpStream::connect(addr)?;
-    let mut response = String::new();
-    stream.read_to_string(&mut response)?;
-
-    Ok(response)
-}
-
-fn format_entries(entries: &Vec<Entry>) -> String {
-    let mut output = String::new();
-
-    for entry in entries {
-        output += &entry.format();
-        output += "\n";
-    }
-
-    output
 }

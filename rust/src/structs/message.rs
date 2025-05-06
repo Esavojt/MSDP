@@ -11,6 +11,21 @@ pub struct MessageV1 {
     pub load: [f32; 3],
 }
 
+/// Message v1 structure:
+/// - 16b : Unique ID (UUID)
+/// - 2b : Version (u16)
+/// - 2b : System name length (u16)
+/// - n : System name (string)
+/// - 2b : System platform length (u16)
+/// - n : System platform (string)
+/// - 2b : System version length (u16)
+/// - n : System version (string)
+/// - 2b : Keepalive timer (u16)
+/// - 4b : Uptime (u32)
+/// - 2b : Load average 1 (u16)
+/// - 2b : Load average 5 (u16)
+/// - 2b : Load average 15 (u16)
+
 impl MessageV1 {
     pub fn new(
         unique_id: Uuid,

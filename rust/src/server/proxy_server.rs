@@ -2,6 +2,8 @@ use std::io::Write;
 use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 
+use log::info;
+
 use crate::server::control_server::TCPServerTrait;
 use crate::structs::entry::Entry;
 
@@ -25,6 +27,8 @@ impl TCPServerTrait for ProxyServer {
             let entries = self.get_entries().lock().unwrap();
             serde_json::to_string(&*entries)?
         };
+
+        info!("Sending JSON data to proxy client");
 
         // Send the JSON data to the client
         stream.write_all(b"HTTP/1.1 200 OK\r\n")?;

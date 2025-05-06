@@ -7,6 +7,8 @@ use rust::server::server::MSDPServer;
 use rust::structs::entry::Entry;
 
 fn main() {
+    env_logger::init();
+
     let multicast_group = [226, 0, 10, 70];
     let port = 10000;
 
@@ -21,7 +23,7 @@ fn main() {
             .map(|x| x.to_string())
             .collect::<Vec<_>>()
             .join("."),
-        port
+        port,
     );
 
     let control_server =

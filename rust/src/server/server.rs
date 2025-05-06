@@ -3,6 +3,8 @@ use std::net::SocketAddr;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
 
+use log::{info, error, debug};
+
 use std::time::Duration;
 use uuid::Uuid;
 
@@ -71,6 +73,7 @@ impl MSDPServer {
 
         if let Err(e) = data {
             if e.kind() == std::io::ErrorKind::WouldBlock {
+                debug!("No data received, continuing...");
                 return Ok(Err(()));
             } else {
                 return Err(e);
@@ -83,12 +86,13 @@ impl MSDPServer {
 
         if let Ok(msg) = message {
             if msg.unique_id == self.unique_id {
-                //println!("Received message from self, ignoring");
+                debug!("Received message from self, ignoring");
                 return Ok(Err(()));
             }
+            info!("Received a valid v{} message from {:?}", msg.version, addr);
             Ok(Ok((msg, addr)))
         } else {
-            println!("Failed to parse message from {:?}", addr);
+            error!("Failed to parse message from {:?}", addr);
             Ok(Err(()))
         }
     }
@@ -123,10 +127,12 @@ impl MSDPServer {
                     entry.uptime = msg.uptime;
                     entry.load = msg.load;
                     entry.keepalive_timer = msg.keepalive_timer;
+                    info!("Updated entry: {}", msg.system_name);
                 }
             }
 
             if !found {
+                info!("New entry: {}", msg.system_name);
                 let entry = Entry::from_message(msg, addr);
                 entries.push(entry);
             }
