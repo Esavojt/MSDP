@@ -75,18 +75,18 @@ This project has 4 main components:
 These components are implemented in these files:
 
 - Client
-  - Python: python/control_client.py
-  - Rust: rust/src/bin/client.rs
+  - Python: [python/control_client.py](python/control_client.py)
+  - Rust: [rust/src/bin/client.rs](rust/src/bin/client.rs)
 - Proxy client
-  - Python: python/proxy_client.py
-  - Rust: rust/src/bin/proxy_client.rs
+  - Python: [python/proxy_client.py](python/proxy_client.py)
+  - Rust: [rust/src/bin/proxy_client.rs](rust/src/bin/proxy_client.rs)
 - Server
-  - Python: python/server.py
-  - Rust: rust/src/bin/server.rs
+  - Python: [python/server.py](python/server.py)
+  - Rust: [rust/src/bin/server.rs](rust/src/bin/server.rs)
 - Proxy
-  - Python: python/proxy.py - Implements HTTP
-  - Rust: rust/src/bin/http_proxy.rs - Implements HTTP
-  - Rust: rust/src/bin/raw_proxy.rs - Implements raw TCP sockets
+  - Python: [python/proxy.py](python/proxy.py) - Implements HTTP
+  - Rust: [rust/src/bin/http_proxy.rs](rust/src/bin/http_proxy.rs) - Implements HTTP
+  - Rust: [rust/src/bin/raw_proxy.rs](rust/src/bin/raw_proxy.rs) - Implements raw TCP sockets
 
 ## Usage
 
