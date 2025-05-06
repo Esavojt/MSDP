@@ -9,13 +9,7 @@ multicast_group = '226.0.10.70'
 
 client = MSDPClient(multicast_group, port=10000, keepalive_timer=5)
 
-# Check if socket path exists and remove it
-socket_path = "/run/msdp.sock"
-if os.path.exists(socket_path):
-    os.remove(socket_path)
-
-os.umask(0o000)
-control_server = ControlServer(socket_path, client)
+control_server = ControlServer(("127.0.0.1", 10001), client)
 
 
 threading.Thread(target=control_server.handle_connections, daemon=True).start()
