@@ -1,6 +1,6 @@
+pub mod client;
 pub mod server;
 pub mod structs;
-pub mod client;
 
 pub fn format_time(duration: u64) -> String {
     let seconds = duration % 60;

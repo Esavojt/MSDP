@@ -1,16 +1,19 @@
 use std::env;
 
+use log::warn;
 use rust::client::client::Client;
 
-
 fn main() -> std::io::Result<()> {
-    let mut addr = String::from("localhost:10001");
+    env_logger::init();
     let mut args = env::args();
 
-    if args.len() > 1 {
-        // Set the address from the command line argument
-        addr = args.nth(1).unwrap();
-    }
+    let addr: String = match args.nth(1) {
+        Some(arg) => arg,
+        None => {
+            warn!("No config file provided. Using default: config.toml");
+            String::from("localhost:10001")
+        }
+    };
     let entries = Client::connect(&addr)?;
     //println!("{}", data);
 
@@ -21,5 +24,3 @@ fn main() -> std::io::Result<()> {
 
     Ok(())
 }
-
-

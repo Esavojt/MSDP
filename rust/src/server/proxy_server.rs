@@ -24,7 +24,9 @@ impl TCPServerTrait for ProxyServer {
 
     fn handle_client(&self, mut stream: std::net::TcpStream) -> std::io::Result<()> {
         let json = {
-            let entries = self.get_entries().lock().unwrap();
+            let entries = self.get_entries()
+                .lock()
+                .expect("Failed to lock entries");
             serde_json::to_string(&*entries)?
         };
 

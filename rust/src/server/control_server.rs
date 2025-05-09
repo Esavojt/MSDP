@@ -24,7 +24,7 @@ pub trait TCPServerTrait {
             "Control server is listening on {}",
             self.get_socket().local_addr()?
         );
-        
+
         for stream in self.get_socket().incoming() {
             match stream {
                 Ok(stream) => {
@@ -72,7 +72,9 @@ impl TCPServerTrait for ControlServer {
 
     fn handle_client(&self, mut stream: std::net::TcpStream) -> std::io::Result<()> {
         let json = {
-            let entries = self.entries.lock().unwrap();
+            let entries = self.entries
+                .lock()
+                .expect("Failed to lock entries");
             serde_json::to_string(&*entries)?
         };
 
