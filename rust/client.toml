@@ -1,6 +1,6 @@
 [mgmt_vlan]
 name = "Management VLAN"
-ip = "xo.prestiz.local"
+ip = "management.server.local"
 port = 10002
 
 [data_vlan]
