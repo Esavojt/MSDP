@@ -65,12 +65,13 @@ Entry: dev.example.net (03cbe184-83a2-468b-a772-1c3602e3eaf5)
 
 ![Component diagram](MSDP.svg)
 
-This project has 4 main components:
+This project has 5 main components:
 
 - Client - client, connects to a server (locally) and shows neighbors of the server
 - Proxy client - proxy client, connects to proxy and shows neighbors of the proxy server, can connect to multiple proxies (aggregates neighbors from multiple proxies), current implementation is only raw TCP
 - Server - server daemon, handles all the multicast messages, runs the MSDP protocol, listens locally for connections from clients
 - Proxy - works the same as a daemon but also listens for connections from proxy clients, currently has 2 implementations, raw TCP and HTTP
+- Prometheus exporter - works as a proxy client but exports data in prometheus format, listens on port 10000
 
 These components are implemented in these files:
 
@@ -87,6 +88,8 @@ These components are implemented in these files:
   - Python: [python/proxy.py](python/proxy.py) - Implements HTTP
   - Rust: [rust/src/bin/http_proxy.rs](rust/src/bin/http_proxy.rs) - Implements HTTP
   - Rust: [rust/src/bin/raw_proxy.rs](rust/src/bin/raw_proxy.rs) - Implements raw TCP sockets
+- Prometheus exporter
+  - Rust: [rust/src/bin/prometheus_exporter.rs](rust/src/bin/prometheus_exporter.rs)
 
 ## Usage
 
