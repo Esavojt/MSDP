@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::Write, net::TcpListener, sync::{Arc, Mutex}};
+use std::{collections::HashMap, io::{BufRead, BufReader, BufWriter, Write}, net::TcpListener, os::unix::thread, sync::{Arc, Mutex}, thread::{sleep, spawn}, time::Duration, vec};
 
 use crate::{client::client::Client, server::control_server::TCPServerTrait, structs::entry::Entry};
 
@@ -18,49 +18,73 @@ impl TCPServerTrait for ExportServer {
 
     fn handle_client(&self, mut stream: std::net::TcpStream) -> std::io::Result<()> {
         log::info!("Handling new connection...");
+        
         let entries = self.get_entries_from_endpoints();
-        stream.write_all(b"HTTP/1.1 200 OK\r\n")?;
-        stream.write_all(b"Content-Type: text/plain; version=0.0.4\r\n")?;
-        stream.write_all(b"Connection:close\r\n\r\n")?;
-        stream.write_all(b"# HELP msdp_entry_uptime Uptime of a server\n")?;
-        stream.write_all(b"# TYPE msdp_entry_uptime counter\n")?;
-        stream.write_all(b"# HELP msdp_entry_load Uptime of a server\n")?;
-        stream.write_all(b"# TYPE msdp_entry_load gauge\n")?;
+        log::info!("Got {} endpoint groups", entries.len());
+        
+        let mut buff: Vec<u8> = Vec::new();
+
+        buff.extend_from_slice(b"# HELP msdp_entry_uptime Uptime of a server\n");
+        buff.extend_from_slice(b"# TYPE msdp_entry_uptime counter\n");
+        buff.extend_from_slice(b"# HELP msdp_entry_load Uptime of a server\n");
+        buff.extend_from_slice(b"# TYPE msdp_entry_load gauge\n");
         for (name, entries) in &entries {
             for entry in entries {
-                stream.write_all(
+                buff.extend_from_slice(
                     format!("msdp_entry_uptime{{proxy_server_name=\"{}\", address=\"{}\", system_name=\"{}\"}} ", name, entry.address, entry.system_name)
                     .as_bytes()
-                )?;
-                stream.write_all(entry.uptime.to_string().as_bytes())?;
-                stream.write_all(b"\n")?;
+                );
+                buff.extend_from_slice(entry.uptime.to_string().as_bytes());
+                buff.extend_from_slice(b"\n");
 
-                stream.write_all(
+                buff.extend_from_slice(
                     format!("msdp_entry_load{{proxy_server_name=\"{}\", address=\"{}\", system_name=\"{}\", type=\"5\"}} ", name, entry.address, entry.system_name)
                     .as_bytes()
-                )?;
-                stream.write_all(entry.load[0].to_string().as_bytes())?;
-                stream.write_all(b"\n")?;
+                );
+                buff.extend_from_slice(entry.load[0].to_string().as_bytes());
+                buff.extend_from_slice(b"\n");
 
-                stream.write_all(
+                buff.extend_from_slice(
                     format!("msdp_entry_load{{proxy_server_name=\"{}\", address=\"{}\", system_name=\"{}\", type=\"10\"}} ", name, entry.address, entry.system_name)
                     .as_bytes()
-                )?;
-                stream.write_all(entry.load[1].to_string().as_bytes())?;
-                stream.write_all(b"\n")?;
+                );
+                buff.extend_from_slice(entry.load[1].to_string().as_bytes());
+                buff.extend_from_slice(b"\n");
 
-                stream.write_all(
+                buff.extend_from_slice(
                     format!("msdp_entry_load{{proxy_server_name=\"{}\", address=\"{}\", system_name=\"{}\", type=\"15\"}} ", name, entry.address, entry.system_name)
                     .as_bytes()
-                )?;
-                stream.write_all(entry.load[2].to_string().as_bytes())?;
-                stream.write_all(b"\n")?;
+                );
+                buff.extend_from_slice(entry.load[2].to_string().as_bytes());
+                buff.extend_from_slice(b"\n");
             }
         }
-        stream.shutdown(std::net::Shutdown::Both)?;
-        Ok(())
+
+        log::info!("Built response body of {} bytes", buff.len());
         
+        let mut response = Vec::new();
+        response.extend_from_slice(b"HTTP/1.1 200 OK\r\n");
+        response.extend_from_slice(b"Content-Type: text/plain; version=0.0.4\r\n");
+        response.extend_from_slice(b"Connection: close\r\n");
+        response.extend_from_slice(format!("Content-Length: {}\r\n\r\n", buff.len()).as_bytes());
+        response.extend_from_slice(&buff);
+
+        log::info!("Total response size: {} bytes", response.len());
+        
+        match stream.write_all(&response) {
+            Ok(_) => log::info!("Successfully wrote response"),
+            Err(e) => {
+                log::error!("Failed to write response: {}", e);
+                return Err(e);
+            }
+        }
+        
+        stream.flush()?;
+        stream.shutdown(std::net::Shutdown::Both)?;
+        log::info!("Successfully handled client");
+        Ok(())
     }
+
     fn handle_connections(&self) -> std::io::Result<()> {
         for stream in self.get_socket().incoming() {
             let stream = stream?;
