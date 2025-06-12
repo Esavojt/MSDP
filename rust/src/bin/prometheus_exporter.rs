@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use std::env;
 
-use config::Map;
 use log::warn;
 use rust::client::client::Client;
-use rust::structs::entry::Entry;
+use rust::prometheus_exporter::exporter::ExportServer;
+use rust::server::control_server::TCPServerTrait;
 
 fn main() -> std::io::Result<()> {
     env_logger::init();
@@ -25,22 +25,11 @@ fn main() -> std::io::Result<()> {
 
     println!("Reading config file: {}", file_loc);
     let endpoints: HashMap<String, HashMap<String, String>> = conf
-        .try_deserialize::<HashMap<String, Map<String, String>>>()
+        .try_deserialize::<HashMap<String, HashMap<String, String>>>()
         .unwrap();
 
-    for (key, value) in &endpoints {
-        let ip = value.get("ip").expect("IP not found");
-        let port = value.get("port").expect("Port not found");
-        let addr = format!("{}:{}", ip, port);
-        let name = value.get("name").unwrap_or(key);
+    let server  = ExportServer::new("0.0.0.0:10000", endpoints)?;
 
-        let entries: Vec<Entry> = Client::connect(&addr)?;
-
-        println!("List of neighbors:");
-        println!("=========== {}: {} ===========", name, addr);
-        let output = Client::format_entries(&entries);
-        println!("{}", output);
-    }
-
-    Ok(())
+    println!("Handling new connections...");
+    server.handle_connections()
 }

@@ -51,14 +51,14 @@ impl MSDPServer {
         let uptime = uptime_lib::get()
             .unwrap_or_else(|_| Duration::new(0, 0));
 
-        let load = sys_info::loadavg().unwrap_or_else(|_| sys_info::LoadAvg {
+        let load = sys_info::loadavg().unwrap_or(sys_info::LoadAvg {
             one: 0.0,
             five: 0.0,
             fifteen: 0.0,
         });
 
         let message = MessageV1::new(
-            self.unique_id.clone(),
+            self.unique_id,
             sys_info::hostname().unwrap_or_else(|_| "Unknown".to_string()),
             sys_info::os_type().unwrap_or_else(|_| "Unknown".to_string()),
             sys_info::os_release().unwrap_or_else(|_| "Unknown".to_string()),
